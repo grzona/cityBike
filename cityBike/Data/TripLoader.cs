@@ -59,17 +59,15 @@ public static class TripLoader
     {
         var stations_beg = rows
             .Where(r => r.StartStationId != null && r.StartStationName != null)
-            .Select(r => new Models.Station(r.StartStationId, r.StartStationName, r.StartLat, r.StartLng));
+            .Select(r => new Models.Station(r.StartStationId!, r.StartStationName!));
          
         var stations_end = rows
-            .Where(r => r.EndStationId != null && r.EndStationName != null 
-                && r.EndLat != null && r.EndLng != null)
-            .Select(r => new Models.Station(r.EndStationId, r.EndStationName,
-                (double)r.EndLat, (double)r.EndLng));
+            .Where(r => r.EndStationId != null)
+            .Select(r => new Models.Station(r.EndStationId!, r.EndStationName!));
         
         var stations_dups = stations_beg.Concat(stations_end);
         
-        var stations = stations_dups.Distinct();
+        var stations = stations_dups.DistinctBy(s => s.Id);
         
         return stations.ToList();
     }
