@@ -1,6 +1,3 @@
 namespace cityBike.Models;
 
-public class Station
-{
-    
-}
+public record Station(string Id, string Name, double Lat, double Lng);

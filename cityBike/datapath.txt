@@ -1,1 +1,1 @@
-~/pw/p3/projects/projectData/JC-202610-citibike-tripdata.csv
+/home/grzona/pw/p3/projects/projectData/JC-202610-citibike-tripdata.csv
