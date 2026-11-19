@@ -29,7 +29,7 @@ public static class TripLoader
 
         var stations = BuildStations(rows);
 
-        return new PeriodTripData(Path.GetFileNameWithoutExtension(path), rides, stations);
+        return new PeriodTripData(rides, stations, Path.GetFileNameWithoutExtension(path));
     }
 
     // Czyta jeden plik CSV i zwraca jego wiersze po jednym naraz.

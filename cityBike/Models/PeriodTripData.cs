@@ -1,4 +1,4 @@
 namespace cityBike.Models;
 
-public record PeriodTripData(string? Source,string? Description, DateTime? Begin, DateTime? End,
-    IReadOnlyList<Ride> Rides, IReadOnlyList<Station> Stations);
+public record PeriodTripData(IReadOnlyList<Ride> Rides, IReadOnlyList<Station> Stations, 
+    string? Source = null, string? Description = null, DateTime? Begin = null, DateTime? End = null);
