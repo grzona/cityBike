@@ -1,0 +1,5 @@
+# Ścieżki do plików CSV z Citi Bike, jedna na linię.
+# Linie puste i zaczynające się od # są pomijane.
+# Najlepiej podawaj ścieżki bezwzględne, np.:
+# /home/pawel/data/202510-citibike-tripdata.csv
+# C:\Users\Pawel\data\202510-citibike-tripdata.csv
