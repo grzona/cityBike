@@ -7,7 +7,7 @@ using cityBike.Models;
 public static class TripLoader
 {
     // Czyta plik ze ścieżkami i zwraca osobne dane dla każdego miesiąca (pliku).
-    public static List<MonthlyTripData> Load(string pathsFile)
+    public static List<PeriodTripData> Load(string pathsFile)
     {
         return File.ReadLines(pathsFile)
             .Select(l => l.Trim())                          // obcinamy spacje
@@ -18,7 +18,7 @@ public static class TripLoader
     }
 
     // Wczytuje jeden plik CSV jako dane jednego miesiąca.
-    private static MonthlyTripData LoadOne(string path)
+    private static PeriodTripData LoadOne(string path)
     {
         var rows = ReadRows(path).ToList();
 
@@ -29,7 +29,7 @@ public static class TripLoader
 
         var stations = BuildStations(rows);
 
-        return new MonthlyTripData(Path.GetFileNameWithoutExtension(path), rides, stations);
+        return new PeriodTripData(Path.GetFileNameWithoutExtension(path), rides, stations);
     }
 
     // Czyta jeden plik CSV i zwraca jego wiersze po jednym naraz.

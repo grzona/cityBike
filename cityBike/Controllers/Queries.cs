@@ -8,7 +8,7 @@ public class Queries
     public void Solve()
     {
         string dataPathFiles = "/home/grzona/pw/p3/projects/cityBike/cityBike/datapath.txt";
-        List<MonthlyTripData> months  = Data.TripLoader.Load(dataPathFiles);
+        List<PeriodTripData> months  = Data.TripLoader.Load(dataPathFiles);
         
         int monthsCount = months.Count;
         Console.WriteLine($"Pomyślnie załadowano *{monthsCount}* miesięcy");
@@ -21,7 +21,7 @@ public class Queries
         
     }
 
-    List<Station> DeficitStations(MonthlyTripData dataset)
+    List<Station> DeficitStations(PeriodTripData dataset)
     {
         var rides = dataset.Rides;
 
