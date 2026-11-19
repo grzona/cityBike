@@ -2,73 +2,67 @@ namespace cityBike.Data;
 using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
-
+using cityBike.Models;
 
 public static class TripLoader
 {
-    public static Models.TripData Load(string pathsFile)
+    // Czyta plik ze ścieżkami i zwraca osobne dane dla każdego miesiąca (pliku).
+    public static List<MonthlyTripData> Load(string pathsFile)
     {
-        // Czytamy datapath.txt linijka po linijce (każda linijka to string).
-        var paths = File.ReadLines(pathsFile)
-            .Select(l => l.Trim())                          // każdą linijkę obcinamy ze spacji
-            .Where(l => l != "" && !l.StartsWith('#'))      // wyrzucamy puste i komentarze
-            .Where(File.Exists);                            // zostają tylko istniejące pliki
+        return File.ReadLines(pathsFile)
+            .Select(l => l.Trim())                          // obcinamy spacje
+            .Where(l => l != "" && !l.StartsWith('#'))      // bez pustych i komentarzy
+            .Where(File.Exists)                             // tylko istniejące pliki
+            .Select(LoadOne)                                // każda ścieżka -> dane miesiąca
+            .ToList();
+    }
 
-        // Dla każdej ścieżki ReadRows daje wiersze tego pliku.
-        // SelectMany skleja wiersze ze wszystkich plików w jedną sekwencję.
-        // ToList() faktycznie czyta wszystko i zapisuje w pamięci.
-        var rows = paths.SelectMany(ReadRows).ToList();
+    // Wczytuje jeden plik CSV jako dane jednego miesiąca.
+    private static MonthlyTripData LoadOne(string path)
+    {
+        var rows = ReadRows(path).ToList();
 
-        // Każdy surowy wiersz przepisujemy na Ride (bez nazw i współrzędnych stacji).
         var rides = rows
-            .Select(r => new Models.Ride(r.RideId, r.RideableType, r.StartedAt, r.EndedAt,
+            .Select(r => new Ride(r.RideId, r.RideableType, r.StartedAt, r.EndedAt,
                                   r.StartStationId, r.EndStationId, r.MemberCasual))
             .ToList();
 
-        var stations = BuildStations(rows);   // osobna tabela stacji
+        var stations = BuildStations(rows);
 
-        return new Models.TripData(rides, stations);
+        return new MonthlyTripData(Path.GetFileNameWithoutExtension(path), rides, stations);
     }
 
-    // Czyta jeden plik CSV i zwraca jego wiersze jako TripRow, po jednym naraz.
-    private static IEnumerable<Models.TripRow> ReadRows(string path)
+    // Czyta jeden plik CSV i zwraca jego wiersze po jednym naraz.
+    private static IEnumerable<TripRow> ReadRows(string path)
     {
-        // Ustawienia CsvHelpera:
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture) // kropka jako separator dziesiętny
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
-            MissingFieldFound = null,             // brak kolumny w wierszu: nie rzucaj błędu
-            BadDataFound = null,                  // zepsute cudzysłowy itp.: ignoruj
-            ReadingExceptionOccurred = _ => false // wiersz nie do sparsowania: pomiń go
-                                                  // (_ to parametr, którego nie używamy)
+            MissingFieldFound = null,             // brak kolumny: bez błędu
+            BadDataFound = null,                  // zepsute dane: ignoruj
+            ReadingExceptionOccurred = _ => false // wiersz nie do sparsowania: pomiń
         };
 
-        using var reader = new StreamReader(path);       // otwiera plik do czytania
-        using var csv = new CsvReader(reader, config);   // czyta z niego CSV
+        using var reader = new StreamReader(path);
+        using var csv = new CsvReader(reader, config);
 
-        // GetRecords dopasowuje kolumny do TripRow po atrybutach [Name].
-        // yield return oddaje wiersze pojedynczo, bez ładowania całego pliku naraz.
-        // Plik zamyka się (using) dopiero gdy przeczytamy wszystkie wiersze.
-        
-        
-        
-        foreach (var row in csv.GetRecords<Models.TripRow>())
+        foreach (var row in csv.GetRecords<TripRow>())
             yield return row;
     }
-    
-    private static List<Models.Station> BuildStations(List<Models.TripRow> rows)
+
+    // Twoja wersja, z DistinctBy, bez współrzędnych i z `!`.
+    private static List<Station> BuildStations(List<TripRow> rows)
     {
-        var stations_beg = rows
+        var stationsBeg = rows
             .Where(r => r.StartStationId != null && r.StartStationName != null)
-            .Select(r => new Models.Station(r.StartStationId!, r.StartStationName!));
-         
-        var stations_end = rows
-            .Where(r => r.EndStationId != null)
-            .Select(r => new Models.Station(r.EndStationId!, r.EndStationName!));
-        
-        var stations_dups = stations_beg.Concat(stations_end);
-        
-        var stations = stations_dups.DistinctBy(s => s.Id);
-        
-        return stations.ToList();
+            .Select(r => new Station(r.StartStationId!, r.StartStationName!));
+
+        var stationsEnd = rows
+            .Where(r => r.EndStationId != null && r.EndStationName != null)
+            .Select(r => new Station(r.EndStationId!, r.EndStationName!));
+
+        return stationsBeg
+            .Concat(stationsEnd)
+            .DistinctBy(s => s.Id)
+            .ToList();
     }
 }
