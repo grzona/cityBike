@@ -18,14 +18,36 @@ public class Queries
         /*
          * STACJE, NA KTÓRYCH UBYWA ROWERÓW 
          */
-        var deficitStations = DeficitStations(firstMonth);
-        Console.WriteLine("STACJE DEFICYTOWE:\n");
-        Console.WriteLine(String.Join(Environment.NewLine, deficitStations));
-        Console.WriteLine("\n");
+        // var deficitStations = DeficitStations(firstMonth);
+        // Console.WriteLine("STACJE DEFICYTOWE:\n");
+        // Console.WriteLine(String.Join(Environment.NewLine, deficitStations));
+        // Console.WriteLine("\n");
         
-        
-    }
+        /*
+         * Porównaie stacji deficytowych miesiąc do miesiąca
+         */
 
+        var stationBalances = months.Select(DeficitStations).ToList();
+
+        var coparisonTable = stationBalances
+                .SelectMany(sb => sb)
+                .GroupBy(s => s.Id)
+                .Select(sb => new PeriodComparison(
+                    sb.Key,
+                    sb.First().Name,
+                    sb.Average(s => s.Balance),
+                    sb.Select(s => s.Balance).ToArray()
+                    )
+                ).ToList();
+            
+            Console.WriteLine($"Wyciągnięto porównanie deficytów z {monthsCount} miesięcy");
+            Console.WriteLine(String.Join(Environment.NewLine, coparisonTable));
+            Console.WriteLine("\n");
+        
+
+    }
+    
+    
     List<StationBalance> DeficitStations(PeriodTripData dataset)
     {
         var rides = dataset.Rides;

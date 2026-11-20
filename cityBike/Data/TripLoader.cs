@@ -37,7 +37,7 @@ public static class TripLoader
     {
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
-            
+            PrepareHeaderForMatch = args => args.Header.Replace("_", "").ToLower(),
             MissingFieldFound = null,             // brak kolumny: bez błędu
             BadDataFound = null,                  // zepsute dane: ignoruj
             ReadingExceptionOccurred = _ => false // wiersz nie do sparsowania: pomiń
